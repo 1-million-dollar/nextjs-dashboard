@@ -6,6 +6,7 @@ import {
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  FormattedCustomersTable
 } from './definitions';
 import { formatCurrency } from './utils';
 
@@ -167,7 +168,7 @@ export async function fetchInvoiceById(id: string) {
 
 export async function fetchCustomers() {
   try {
-    const data = await sql<CustomerField>`
+    const data = await sql<FormattedCustomersTable>`
       SELECT
         id,
         name
