@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { createInvoice, State } from '@/app/lib/actions';
+import { createCustomer, ConState } from '@/app/lib/actions';
 
 import { CustomerField } from '@/app/lib/definitions';
 import Link from 'next/link';
@@ -14,8 +14,8 @@ import { Button } from '@/app/ui/button';
 
 
 export default function Form() {
-  const initialState: State = { message: null, errors: {} };
-  const [state, formAction] = useActionState(createInvoice, initialState);
+  const initialState: ConState = { message: null, errors: {} };
+  const [state, formAction] = useActionState(createCustomer, initialState);
   return (
     <form action={formAction}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
@@ -34,12 +34,22 @@ export default function Form() {
             name='customer'
             type='string'
             placeholder='Enter customer name'
-            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500" 
+            aria-describedby="name-error"
+            required
             
             />
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           
           </div>
+          <div id="name-error" aria-live="polite" aria-atomic="true">
+        {state.errors?.customerName &&
+          state.errors.customerName.map((error: string) => (
+            <p className="mt-2 text-sm text-red-500" key={error}>
+              {error}
+            </p>
+          ))}
+      </div>
         </div>
 
         {/*Enter Customer Email */}
@@ -56,6 +66,7 @@ export default function Form() {
             type='string'
             placeholder='Enter customer email'
             className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+            required
             
             />
             <InboxIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
@@ -68,24 +79,7 @@ export default function Form() {
         {/*Enter Image */}
 
 
-        <div className="mb-4">
-          <label htmlFor="customer" className="mb-2 block text-sm font-medium">
-            Enter Image Url
-          </label>
-          <div className="relative">
-            <input
-            id='image'
-            name='image'
-            type='string'
-            placeholder='Enter Image Url'
-            className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
-            
-            />
-            <PhotoIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
-          </div>
-          
-        </div>
-
+        
         
 
         
