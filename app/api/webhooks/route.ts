@@ -58,16 +58,21 @@ export async function POST(req: Request) {
 
   if (evt.type === 'user.created') {
     console.log('userId:', evt.data.id)
-    const { id, email_addresses, first_name, last_name } = evt.data;
-    const email = email_addresses[0].email_address;
+    const { id, email_addresses=[], first_name="", last_name="" } = evt.data;
+    const email = email_addresses.length > 0 ? email_addresses[0].email_address : null;
+
+    if (!email) {
+        console.error('No email found for the user');
+        return new Response('No email found', { status: 400 });
+      }
 
     try {
         await sql`
         INSERT INTO users (clerk_id, email, first_name, last_name) VALUES (${id}, ${email}, ${first_name}, ${last_name})`;
         
-        return new Response('', { status: 200 })
+        return new Response('User Created Sucessfylly!', { status: 200 })
     }catch (err) {
-        return new Response('', { status: 500 })
+        return new Response('Database error', { status: 500 })
       }
   }
 
