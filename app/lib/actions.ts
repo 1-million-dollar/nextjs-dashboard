@@ -5,6 +5,42 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+// actions.ts
+import { NextRequest } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
+
+export async function POST(req: NextRequest) {
+  // Get authentication details from the request
+  const { userId } = getAuth(req);
+
+  // Check if the user is authenticated
+  if (!userId) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  // Fetch additional user data from your database if needed
+  // Example SQL query to fetch user details
+  try {
+    const result = await sql`
+      SELECT * FROM users WHERE clerk_id = ${userId}
+    `;
+    const user = result.rows[0];
+
+    // Proceed with your business logic
+    // ...
+
+    return new Response(JSON.stringify(user), { status: 200 });
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    return new Response('Internal Server Error', { status: 500 });
+  }
+}
+
+
+  
+
+
+
 
 
 
@@ -63,6 +99,8 @@ export type ConState = {
 };
 
 export async function createCustomer(prevState: ConState, formData: FormData) {
+    
+
     const validatedFields = CreateCustomer.safeParse({
         customerName: formData.get('customer'),
         email: formData.get('email'),
@@ -78,8 +116,8 @@ export async function createCustomer(prevState: ConState, formData: FormData) {
     const { customerName, email } = validatedFields.data;
     try {
         await sql`
-        INSERT INTO customers (name, email ) 
-        VALUES (${customerName}, ${email} )
+        INSERT INTO customers (name, email, ) 
+        VALUES (${customerName}, ${email}, } )
         `; 
         } catch (error) {
             return {
