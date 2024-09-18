@@ -37,15 +37,6 @@ export async function POST(req: NextRequest) {
 }
 
 
-  
-
-
-
-
-
-
-
-
 
 const FormSchema = z.object({
     id: z.string(),
@@ -151,6 +142,23 @@ export async function createInvoice(prevState: State, formData: FormData) {
     INSERT INTO invoices (customer_id, amount, status, date)
     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
+
+    const month = sql`SELECT TO_CHAR(date, 'Month') AS month_name FROM invoices
+    `;
+
+    const amt = sql`SELECT revenue FROM revenue WHERE month='September';`
+
+
+    const data = await Promise.all([month, amt]);
+    const month_name = data[0].rows[0].month_name;
+    let sum = Number(data[1].rows[0].revenue ?? 0);
+    sum = sum + amount;
+    await sql`
+    UPDATE revenue 
+    SET revenue = ${sum} 
+    where month = ${month_name}
+    `;
+   
     } catch (error) {
         return {
             message: 'Database Error: Failed to Create Invoice.',
@@ -221,7 +229,35 @@ export async function deleteCustomer(id: string) {
 export async function deleteInvoice(id: string) {
     // throw new Error('Failed to Delete Invoice');
     try{
+    
+
+    const invoice_month = sql`SELECT TO_CHAR(date, 'FMMonth') AS month_name FROM invoices WHERE id = ${id}`;
+    const invoice_amount = sql`SELECT amount FROM invoices WHERE id = ${id}`;
+    
+    
+    const data = await Promise.all([invoice_month, invoice_amount]);
+
+    
+
+    const month = data[0].rows[0].month_name;
+    const amount = Number(data[1].rows[0].amount ?? 0);
+
+    
+
+    const amt = await sql`SELECT revenue FROM revenue WHERE month = ${month};`;
+
+    let sum = Number(amt.rows[0].revenue ?? 0);
+    sum = sum - (amount / 100); 
+
+    await sql`
+    UPDATE revenue 
+    SET revenue = ${sum} 
+    where month = ${month}
+    `;
+    
     await sql `DELETE FROM invoices WHERE id = ${id}`;
+    
+
     revalidatePath('/dashboard/invoices');
     return {message: 'Deleted Invoice.'};
     } catch (error) {
